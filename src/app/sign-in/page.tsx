@@ -1,10 +1,16 @@
 "use client";
-
+import { useAuthStore } from "@/stores/auth";
 import { Button } from "antd";
 import { Formik, Form, Field } from "formik";
 import Link from 'next/link';
+import { login } from "@/lib/api/auth";
+import { useRouter } from "next/navigation";
+import * as Yup from 'yup';
 
 export default function SignInPage() {
+  const router = useRouter();
+  const auth = useAuthStore();
+  //console.log(`username: ${username}`)
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-cover bg-center"
       style={{
@@ -20,8 +26,20 @@ export default function SignInPage() {
 
         <Formik
           initialValues={{ username: "", password: "" }}
-          onSubmit={(values) => {
-            console.log(values);
+          validationSchema={Yup.object({
+            username: Yup.string().required('Required'),
+            password: Yup.string().required('Required')
+          })}
+          onSubmit={async (values) => {
+            const res = await login({
+              identifier: values.username,
+              password: values.password,
+            }).catch(err => {
+              console.error(err)
+            });
+            auth.setToken(res.jwt);
+            router.replace('/')
+
           }}
         >
           <Form className="w-full max-w-xl space-y-4 my-2">
@@ -32,6 +50,8 @@ export default function SignInPage() {
                 id="username"
                 name="username"
                 className="border border-gray-300 rounded-md py-2 px-6 w-full block"
+
+
               />
             </div>
             <div className="pb-5 mx-auto">
@@ -41,6 +61,7 @@ export default function SignInPage() {
                 id="password"
                 name="password"
                 className="border border-gray-300 rounded-md py-2 px-6 w-full block"
+
               />
             </div>
 
@@ -48,6 +69,7 @@ export default function SignInPage() {
               type="primary"
               htmlType="submit"
               className="w-full block"
+
             >
               Sign In
             </Button>

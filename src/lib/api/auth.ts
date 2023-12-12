@@ -12,5 +12,8 @@ export async function login(LoginCredentials: LoginCredentials) {
     credentials: "include",
     body: JSON.stringify(LoginCredentials),
   });
-  return await res.json();
+  const json = await res.json();
+  if (res.status === 400) throw new Error("Login fail");
+  else if (!res.ok) throw new Error(res.statusText);
+  return json;
 }
