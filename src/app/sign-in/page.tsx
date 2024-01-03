@@ -1,7 +1,7 @@
 "use client";
 import { useAuthStore } from "@/stores/auth";
 import { Button } from "antd";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import Link from 'next/link';
 import { login } from "@/lib/api/auth";
 import { useRouter } from "next/navigation";
@@ -10,7 +10,7 @@ import * as Yup from 'yup';
 export default function SignInPage() {
   const router = useRouter();
   const auth = useAuthStore();
-  //console.log(`username: ${username}`)
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-cover bg-center"
       style={{
@@ -27,8 +27,12 @@ export default function SignInPage() {
         <Formik
           initialValues={{ username: "", password: "" }}
           validationSchema={Yup.object({
-            username: Yup.string().required('Required'),
-            password: Yup.string().required('Required')
+            username: Yup.string().required('*Required')
+              .max(15, 'Must be 15 characters or less')
+            ,
+            password: Yup.string().required('*Required')
+              .min(8, 'Password must be atleast 8 characters long')
+
           })}
           onSubmit={async (values) => {
             const res = await login({
@@ -50,10 +54,13 @@ export default function SignInPage() {
                 id="username"
                 name="username"
                 className="border border-gray-300 rounded-md py-2 px-6 w-full block"
-
-
               />
+              <div className='text-sm text-red-600'>
+                <ErrorMessage name="username" />
+              </div>
+
             </div>
+
             <div className="pb-5 mx-auto">
               <label htmlFor="password" className="text-gray-700 font-semibold mb-1">Password:</label>
               <Field
@@ -61,15 +68,18 @@ export default function SignInPage() {
                 id="password"
                 name="password"
                 className="border border-gray-300 rounded-md py-2 px-6 w-full block"
-
               />
+              <div className='text-sm text-red-600'>
+                <ErrorMessage name="password" />
+              </div>
+
+
             </div>
 
             <Button
               type="primary"
               htmlType="submit"
               className="w-full block"
-
             >
               Sign In
             </Button>
